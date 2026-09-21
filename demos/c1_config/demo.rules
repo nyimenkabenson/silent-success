@@ -1,0 +1,1 @@
+alert icmp $DEMO_NET any -> any any (msg:"silent-success c1: ICMP echo from demo net"; itype:8; sid:1000001; rev:1;)
