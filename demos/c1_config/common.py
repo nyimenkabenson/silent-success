@@ -36,10 +36,14 @@ def run_suricata(name, with_config):
     if with_config:
         cmd += ["-c", str(CONFIG)]
     cmd += ["-r", str(PCAP), "-S", str(RULES), "-l", str(log_dir)]
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+    # Merge stderr into stdout so console.txt preserves the real interleaving:
+    # captured separately, the errors would be reordered - a class 4 failure
+    # in our own evidence.
+    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                          text=True, timeout=180)
     # Suricata may print errors to the console, but a pipeline only reads the
     # exit code. Keep the console output as evidence of exactly that gap.
-    (log_dir / "console.txt").write_text(proc.stdout + proc.stderr)
+    (log_dir / "console.txt").write_text(proc.stdout)
     return proc.returncode, log_dir
 
 
