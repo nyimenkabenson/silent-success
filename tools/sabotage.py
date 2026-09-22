@@ -1,26 +1,58 @@
 """Temporarily break a guard, to prove its tests can go red.
 
-Refuses if the target text is not found exactly once. A sabotage that
-silently does nothing produces a green run that proves nothing - the
-failure this project is about, in the tool that verifies it.
+Refuses unless the target text appears exactly once, the names the injected
+line needs are present, and the patched file still parses. Without those
+checks a bad injection breaks the module, pytest errors, and the run goes
+red for the wrong reason - a false red that looks exactly like a working
+sabotage. The original file is restored on any refusal.
 
 Usage:  python tools/sabotage.py guards/c4_evidence.py "<exact line>"
 Restore with: git checkout <file>
 """
+import ast
 import sys
 from pathlib import Path
 
-REPLACEMENT = '        return Verdict(GUARD, Outcome.PASS, "SABOTAGE", evidence)'
+NEEDED = ("Verdict", "Outcome", "GUARD")
 
 
 def main(path, target):
     p = Path(path)
-    text = p.read_text()
-    n = text.count(target)
+    original = p.read_text()
+
+    if "SABOTAGE" in original:
+        print(f"REFUSED: {path} is already sabotaged; restore it first")
+        return 1
+
+    n = original.count(target)
     if n != 1:
         print(f"REFUSED: target found {n} times in {path}; expected exactly 1")
         return 1
-    p.write_text(text.replace(target, REPLACEMENT))
+
+    missing = [name for name in NEEDED if name not in original]
+    if missing:
+        print(f"REFUSED: {path} does not reference {', '.join(missing)}; "
+              "the injected line would raise NameError, not subvert the branch")
+        return 1
+
+    indent = " " * (len(target) - len(target.lstrip()))
+    patched = original.replace(
+        target, f'{indent}return Verdict(GUARD, Outcome.PASS, "SABOTAGE", evidence)')
+
+    try:
+        ast.parse(patched)
+    except SyntaxError as e:
+        print(f"REFUSED: patched file does not parse ({e}); nothing written")
+        return 1
+
+    p.write_text(patched)
+    try:
+        ast.parse(p.read_text())
+    except SyntaxError:
+        p.write_text(original)
+        print("REFUSED: patched file did not parse after writing; original restored")
+        return 1
+
     print(f"sabotaged {path}: one branch now returns PASS. Restore with: git checkout {path}")
     return 0
 
