@@ -1,0 +1,8 @@
+# Artefacts this build is expected to produce, one per line.
+# Committed before the build runs; build.py does not read this file.
+# The guard reads it, so the expectation and the evidence come from different hands.
+topology.yml
+rules.conf
+results.xml
+report.md
+checksums.txt
