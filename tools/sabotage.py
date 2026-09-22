@@ -42,13 +42,16 @@ def main(path, target):
     p = Path(path)
     original = p.read_text()
 
+    # Order matters: an already-sabotaged file is also dirty, and the dirty
+    # message would send the user to commit or stash it - which would put a
+    # sabotaged guard into history. Diagnose the specific case first.
+    if "SABOTAGE" in original:
+        print(f"REFUSED: {path} is already sabotaged; restore it first")
+        return 1
+
     reason = refuse_unless_restorable(p)
     if reason:
         print(f"REFUSED: {reason}")
-        return 1
-
-    if "SABOTAGE" in original:
-        print(f"REFUSED: {path} is already sabotaged; restore it first")
         return 1
 
     n = original.count(target)
