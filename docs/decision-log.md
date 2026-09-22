@@ -7,7 +7,7 @@ Entries are append-only: a reversed decision gets a new entry that supersedes th
 - **Date:** 2026-09-20
 - **Why:** The taxonomy has to produce guards, not just explanations. A cause tells you why something broke; an observable tells you what to assert. "Zero rules loaded" can come from a missing flag, an undefined variable, a wrong path, a permissions problem, a syntax error, or a version mismatch. A cause-based taxonomy scatters those across different buckets; this one puts all of them in class 1, because the guard is identical for every one: read back what actually loaded.
 - **Rejected:** A cause-based taxonomy, such as the mechanism-oriented one derived from incidents in a production LLM agent runtime (arXiv 2606.14589). It would scatter one observable across several classes, so no class would map to a single guard.
-- **Evidence:** `docs/taxonomy-worksheet.md` (commit 55d67d9). Demonstrated so far for one cause only, the missing config: `demos/c1_config/demo_catch.py`.
+- **Evidence:** `docs/taxonomy-worksheet.md` (commit 55d67d9). Demonstrated for two unrelated causes, both caught by the same unchanged guard: missing config (`demos/c1_config/demo.rules` with no `-c`) and a rule syntax error with the config present (`demos/c1_config/demo_syntaxerror.rules`). Both produce exit 0, zero alerts, and `rules_loaded: 0`. Suricata's error text differs between them (`rule-vars` vs `detect-sid`), so a log-text guard would have needed a second pattern; the structured-count guard needed no change.
 
 ## D-002: One primary class per instance, plus recorded secondaries
 - **Date:** 2026-09-20
