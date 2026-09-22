@@ -31,7 +31,8 @@ def main():
     print("\nWhat the pipeline sees")
     print(f"  verify exit code   : {code}")
     print(f"  manifest entries   : {len(lines)}")
-    print(f"  every hash correct : yes (there are none to be wrong)")
+    hashes = "yes (there are none to be wrong)" if not lines else f"yes, for all {len(lines)}"
+    print(f"  every hash correct : {hashes}")
     print(f"  pipeline verdict   : {'VERIFIED' if code == 0 else 'FAILED'}")
     print(f"\nWhat is actually there")
     print(f"  files in {BUILD.relative_to(ROOT)} : {len(files)}")
