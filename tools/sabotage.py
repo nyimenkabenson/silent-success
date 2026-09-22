@@ -10,15 +10,42 @@ Usage:  python tools/sabotage.py guards/c4_evidence.py "<exact line>"
 Restore with: git checkout <file>
 """
 import ast
+import subprocess
 import sys
 from pathlib import Path
 
 NEEDED = ("Verdict", "Outcome", "GUARD")
 
 
+def refuse_unless_restorable(path):
+    """Return a refusal reason, or None if `git checkout` can restore this file.
+
+    Restoration is `git checkout <path>`, which silently discards uncommitted
+    edits and does nothing at all for an untracked file. So the tool refuses
+    to touch anything it could not put back: a restore path that can quietly
+    drop work does not belong in a tool built to refuse silent failure.
+    """
+    try:
+        proc = subprocess.run(["git", "status", "--porcelain", "--", str(path)],
+                              capture_output=True, text=True, check=True)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return "not inside a git repository, so there is no way to restore the file"
+    status = proc.stdout.strip()
+    if not status:
+        return None
+    if status.startswith("??"):
+        return "file is untracked, so `git checkout` would not restore it"
+    return f"file has uncommitted changes ({status.split()[0]}); commit or stash them first"
+
+
 def main(path, target):
     p = Path(path)
     original = p.read_text()
+
+    reason = refuse_unless_restorable(p)
+    if reason:
+        print(f"REFUSED: {reason}")
+        return 1
 
     if "SABOTAGE" in original:
         print(f"REFUSED: {path} is already sabotaged; restore it first")
