@@ -12,6 +12,12 @@ rules carryover in or out.
 
 The pre-state is a claim by the wrapper, which the guard cannot independently
 verify after the fact. See docs/limitations.md.
+
+Assumption the guard does not check: the declared alert count is valid only for
+the specific pcap and rules the declaration was written against. The guard reads
+the number, not the inputs that justify it, so replaying a different pcap or a
+changed rule file produces a confident verdict against a number that no longer
+applies. Whoever changes an input must change the declaration.
 """
 import json
 from pathlib import Path
@@ -62,6 +68,11 @@ def check_output_free_of_prior_runs(declared_path, pre_state_path, eve_path):
         return cannot("pre-state record has no boolean 'existed' field")
     existed = state["existed"]
     evidence["pre_state_existed"] = existed
+    # Carry the recorded size and digest through, so a FAIL can show the before
+    # and after rather than only asserting that a precondition was violated.
+    for field in ("size", "sha256"):
+        if field in state:
+            evidence[f"pre_state_{field}"] = state[field]
 
     # --- the output ---
     if not eve_path.is_file():
@@ -77,15 +88,20 @@ def check_output_free_of_prior_runs(declared_path, pre_state_path, eve_path):
         if event.get("event_type") == "alert":
             alerts += 1
     evidence["alerts"] = alerts
+    evidence["output_size"] = eve_path.stat().st_size
 
     # --- the grid ---
     if existed:
         # A violated precondition is a failure whatever the count says: an
         # appending run and a truncating run are indistinguishable from the
         # count alone, so a match here would be green for the wrong reason.
+        sizes = ""
+        if "size" in state:
+            sizes = f"; output was {state['size']} bytes before this run, {evidence['output_size']} now"
         detail = (f"{alerts} alert(s) against {expected} declared, consistent with carryover"
                   if alerts > expected else
                   f"count matches ({alerts}) but the slate was not clean")
+        detail += sizes
         return Verdict(GUARD, Outcome.FAIL,
                        f"precondition violated: output existed before the run; {detail}", evidence)
     if alerts == expected:
