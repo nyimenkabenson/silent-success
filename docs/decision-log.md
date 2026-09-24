@@ -68,3 +68,21 @@ Entries are append-only: a reversed decision gets a new entry that supersedes th
 - **Why:** What was being protected was an unfinished taxonomy from being read as a finished claim. The worksheet moved twice in two days: row 9 from class 4 to class 6, row 15 from class 1 to class 6, rows 14 and 18 from class 3 to excluded. D-001 only became evidence on 2026-09-22, when a second, unrelated cause produced the same observable and the unchanged guard caught it. A six-class taxonomy with a moving boundary is not a finding yet, it is a draft, and showing a draft as a finding is its own kind of silent success. Copying by another finalist was a partial concern, but if that were the real worry the wait would have run to the deadline rather than two days, and a six-class table is not hard to copy in any case.
 - **Rejected:** Building in public from day one. Nothing material is protected by privacy: the commit history is the evidence, and the repository can be made public on request without any of it changing.
 - **Evidence:** GitHub push timestamps from 2026-09-21 onward; commit history unrewritten.
+
+## D-012: The expectation lives outside the producing script
+- **Date:** 2026-09-22
+- **Why:** A separate file buys the only thing that makes the check non-circular: a separate edit history. If the declaration lives in `build.py`, a change that drops an artefact edits producer and expectation in the same commit, and the guard has nothing to disagree with. `expected.txt` was committed in 504d87a, before `build.py` in ee5bf40, so the order is visible and the expectation cannot have been written after seeing the output. That is the same reason `demo_catch.py` writes its claim before running: the check is only meaningful if the two sides come from different hands, or different moments.
+- **Rejected:** An `EXPECTED` constant inside `build.py`, alongside the code that produces the artefacts.
+- **Evidence:** `demos/c4_evidence/expected.txt` (504d87a) precedes `demos/c4_evidence/build.py` (ee5bf40). The strongest form would be an expectation supplied from outside the build entirely, such as a CI declaration; the committed file with visible commit order is the honest approximation of that.
+
+## D-013: The class 4 guard checks names, not counts
+- **Date:** 2026-09-22
+- **Why:** A count catches the three cases in the log; it does not catch the one not in the log. `report.md` renamed to `notes.md` keeps the entry count at five, so a count-based guard passes it, and that swap is a real class 4 failure: the evidence describes a different state than the real one. The complexity is not decoration, it is the cost of covering the failure a count cannot see, and the guard names which file is missing rather than only that the total is off.
+- **Rejected:** Comparing the manifest's line count against an expected number.
+- **Evidence:** The `swapped` case in `out/c4/results.json`: five entries, five expected, one missing (`report.md`), one unexpected (`notes.md`). Covered by `test_fail_on_swap_where_count_matches`.
+
+## D-014: The sabotage tool refuses rather than patching best-effort
+- **Date:** 2026-09-22
+- **Why:** A bad injection does not produce a false pass, it produces a red run for the wrong reason, and that looks identical in the log to a sabotage that worked. If the injected line references a name the module does not import, or lands with the wrong indentation, pytest errors instead of failing, the traceback points at a NameError, and every negative-control claim resting on that run is unsupported. The tool also underpins the whole defense: the sabotage is what proves the refusal branches are load-bearing, so if the tool can report success without having done anything, nothing it certifies holds. It refuses on four conditions for the same reason the library refuses: a tool whose success signal is indistinguishable from its failure signal is the failure mode this project exists to name.
+- **Rejected:** A plain string replacement with no checks.
+- **Evidence:** `tools/sabotage.py`. Four refusals demonstrated on 2026-09-22: target not unique, required names absent, file untracked or dirty, file already sabotaged. Restoration is `git checkout`, which is why the tool refuses to touch anything it could not put back.
