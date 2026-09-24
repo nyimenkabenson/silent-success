@@ -191,3 +191,15 @@ def test_counts_alerts_not_all_events(declared, tmp_path):
     v = check_output_free_of_prior_runs(declared, pre, eve)
     assert v.evidence["alerts"] == 1
     assert v.outcome is Outcome.PASS
+
+
+def test_file_with_no_alerts_counts_zero(declared, tmp_path):
+    """A narrow tripwire on the counting logic alone: only flow events, so
+    the count must be zero regardless of the surrounding grid. Isolates the
+    count from the pre-state and declaration paths, which the other tests
+    exercise together."""
+    pre = write_pre_state(tmp_path / "pre.json", existed=False)
+    eve = tmp_path / "eve.json"
+    eve.write_text("\n".join(json.dumps({"event_type": "flow"}) for _ in range(4)) + "\n")
+    v = check_output_free_of_prior_runs(declared, pre, eve)
+    assert v.evidence["alerts"] == 0
