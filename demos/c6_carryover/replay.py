@@ -23,6 +23,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from guards.c6_carryover import check_output_free_of_prior_runs
+
 ROOT = Path(__file__).resolve().parents[2]
 IMAGE = "jasonish/suricata:7.0.8"
 C1 = Path("demos/c1_config")
@@ -79,6 +83,20 @@ def main():
                  if l.strip() and json.loads(l).get("event_type") == "alert")
     print(f"run {args.run_id}: pre-state {'absent' if not state['existed'] else 'present'}, "
           f"exit {proc.returncode}, {alerts} alert(s) in {eve}")
+
+    # Judge each replay as it happens, and keep the verdict. Without this only
+    # the final state survives in the directory: a second replay overwrites
+    # pre-state.json, and an earlier PASS becomes unreproducible without
+    # re-running - the evidence describing a state that no longer exists.
+    # Numbered so replays into the same directory cannot overwrite each other.
+    verdict = check_output_free_of_prior_runs(
+        Path("demos/c6_carryover/expected_alerts.txt"), out / "pre-state.json", eve)
+    seq = len(list(out.glob("verdict-*.json"))) + 1
+    (out / f"verdict-{seq}.json").write_text(
+        json.dumps({"run_id": args.run_id, "sequence": seq, **verdict.to_dict()},
+                   indent=2, sort_keys=True) + "\n")
+    print(f"  guard: {verdict.outcome.value} - {verdict.reason}")
+    print(f"  kept:  {out / f'verdict-{seq}.json'}")
     return proc.returncode
 
 
