@@ -172,3 +172,22 @@ def test_refuses_malformed_output_line(declared, tmp_path):
     eve = tmp_path / "eve.json"
     eve.write_text(json.dumps({"event_type": "alert"}) + "\ntruncated{\n")
     assert outcome(declared, pre, eve) is Outcome.CANNOT_EVALUATE
+
+
+def test_counts_alerts_not_all_events(declared, tmp_path):
+    """The guard counts alerts specifically. Every other fixture here writes
+    only alert and stats events, so an "any event" guard would have been caught
+    by accident rather than by claim - this pins it down with unrelated event
+    types present."""
+    pre = write_pre_state(tmp_path / "pre.json", existed=False)
+    eve = tmp_path / "eve.json"
+    eve.write_text("\n".join(json.dumps(e) for e in [
+        {"event_type": "flow"},
+        {"event_type": "alert"},
+        {"event_type": "dns"},
+        {"event_type": "http"},
+        {"event_type": "stats"},
+    ]) + "\n")
+    v = check_output_free_of_prior_runs(declared, pre, eve)
+    assert v.evidence["alerts"] == 1
+    assert v.outcome is Outcome.PASS
