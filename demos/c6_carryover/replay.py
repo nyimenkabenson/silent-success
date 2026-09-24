@@ -68,8 +68,16 @@ def main():
         print(f"REFUSED: --clean was given but {eve} still exists; the slate is not clean")
         return 1
 
-    (out / "pre-state.json").write_text(
-        json.dumps({"run_id": args.run_id, "output": str(eve), **state},
+    # Numbered like the verdicts, so each verdict has its own intact input
+    # beside it. A single pre-state.json would be overwritten by the next
+    # replay, leaving an earlier verdict pointing at a file that contradicts
+    # it - the evidence describing a state that no longer exists.
+    # Note: the sequence counts files already present, so deleting one would
+    # cause a collision. Harmless here because the demo wipes out/c6 first.
+    seq = len(list(out.glob("pre-state-*.json"))) + 1
+    pre_state_file = out / f"pre-state-{seq}.json"
+    pre_state_file.write_text(
+        json.dumps({"run_id": args.run_id, "sequence": seq, "output": str(eve), **state},
                    indent=2, sort_keys=True) + "\n")
 
     proc = subprocess.run(
@@ -90,8 +98,7 @@ def main():
     # re-running - the evidence describing a state that no longer exists.
     # Numbered so replays into the same directory cannot overwrite each other.
     verdict = check_output_free_of_prior_runs(
-        Path("demos/c6_carryover/expected_alerts.txt"), out / "pre-state.json", eve)
-    seq = len(list(out.glob("verdict-*.json"))) + 1
+        Path("demos/c6_carryover/expected_alerts.txt"), pre_state_file, eve)
     (out / f"verdict-{seq}.json").write_text(
         json.dumps({"run_id": args.run_id, "sequence": seq, **verdict.to_dict()},
                    indent=2, sort_keys=True) + "\n")
