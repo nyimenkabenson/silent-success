@@ -87,7 +87,15 @@ def main():
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=180)
     (out / "console.txt").write_text(proc.stdout)
 
-    alerts = sum(1 for l in eve.read_text().splitlines()
+    # Snapshot the output before judging it: the next replay appends to
+    # eve.json, so a verdict naming it would, one run later, point at a file
+    # that no longer matches. Copy rather than rename - renaming would leave
+    # no eve.json for the next replay to append to, and the carryover this
+    # demo exists to reproduce would not happen.
+    eve_snapshot = out / f"eve-{seq}.json"
+    shutil.copy2(eve, eve_snapshot)
+
+    alerts = sum(1 for l in eve_snapshot.read_text().splitlines()
                  if l.strip() and json.loads(l).get("event_type") == "alert")
     print(f"run {args.run_id}: pre-state {'absent' if not state['existed'] else 'present'}, "
           f"exit {proc.returncode}, {alerts} alert(s) in {eve}")
@@ -98,7 +106,7 @@ def main():
     # re-running - the evidence describing a state that no longer exists.
     # Numbered so replays into the same directory cannot overwrite each other.
     verdict = check_output_free_of_prior_runs(
-        Path("demos/c6_carryover/expected_alerts.txt"), pre_state_file, eve)
+        Path("demos/c6_carryover/expected_alerts.txt"), pre_state_file, eve_snapshot)
     (out / f"verdict-{seq}.json").write_text(
         json.dumps({"run_id": args.run_id, "sequence": seq, **verdict.to_dict()},
                    indent=2, sort_keys=True) + "\n")
