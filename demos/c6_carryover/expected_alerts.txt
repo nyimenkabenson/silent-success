@@ -1,0 +1,7 @@
+# Alerts a complete replay of out/c1/demo.pcap under demos/c1_config/demo.rules produces.
+#
+# The pcap holds one ICMP echo request; the rule matches ICMP echo requests from
+# DEMO_NET; so one packet produces one alert. This number is declared, not derived:
+# computing it from the pcap in general would mean reimplementing Suricata's
+# matching logic, and the guard is not a second Suricata.
+1
