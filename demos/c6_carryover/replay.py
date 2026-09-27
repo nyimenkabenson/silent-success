@@ -17,7 +17,6 @@ Usage:
 Omitting it is the mistake this demo reproduces.
 """
 import argparse
-import hashlib
 import json
 import subprocess
 import sys
@@ -33,12 +32,19 @@ C1 = Path("demos/c1_config")
 
 
 def pre_state(path):
-    """Describe the output file as it is right now, before anything runs."""
+    """Describe the output file as it is right now, before anything runs.
+
+    Records the alert count, not the size or a digest. Suricata assigns
+    flow_id at runtime, so two replays of the same pcap produce different
+    bytes and different lengths: a recorded digest or size would carry that
+    non-determinism into every verdict that copied it. The alert count is
+    derived from the packets, so it is stable across invocations.
+    """
     if not path.exists():
         return {"existed": False}
-    data = path.read_bytes()
-    return {"existed": True, "size": len(data),
-            "sha256": hashlib.sha256(data).hexdigest()}
+    alerts = sum(1 for l in path.read_text().splitlines()
+                 if l.strip() and json.loads(l).get("event_type") == "alert")
+    return {"existed": True, "alerts": alerts}
 
 
 def main():
@@ -54,9 +60,14 @@ def main():
     out = Path("out/c6") / args.run_id
     eve = out / "eve.json"
 
-    if args.clean:
-        shutil.rmtree(out, ignore_errors=True)
     out.mkdir(parents=True, exist_ok=True)
+    if args.clean:
+        # Clear Suricata's output only. The verdict and pre-state records are
+        # history, not scratch: removing the whole directory would erase an
+        # earlier replay's verdict, so a correct pair would keep no evidence
+        # that its first replay ever passed.
+        for name in ("eve.json", "console.txt", "fast.log", "stats.log", "suricata.log"):
+            (out / name).unlink(missing_ok=True)
 
     state = pre_state(eve)
     # --clean claims to have emptied the slate. Check that claim against the

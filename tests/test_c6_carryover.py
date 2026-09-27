@@ -20,7 +20,7 @@ def write_declared(path, body="# a comment\n1\n"):
 def write_pre_state(path, existed=False, extra=None):
     doc = {"existed": existed}
     if existed:
-        doc.update({"size": 8613, "sha256": "b" * 64})
+        doc.update({"alerts": 1})
     if extra:
         doc.update(extra)
     path.write_text(json.dumps(doc))
@@ -90,9 +90,8 @@ def test_dirty_slate_failure_shows_before_and_after(declared, tmp_path):
     pre = write_pre_state(tmp_path / "pre.json", existed=True)
     eve = write_eve(tmp_path / "eve.json", alerts=2)
     v = check_output_free_of_prior_runs(declared, pre, eve)
-    assert v.evidence["pre_state_size"] == 8613
-    assert "output_size" in v.evidence
-    assert "8613 bytes before this run" in v.reason
+    assert v.evidence["pre_state_alerts"] == 1
+    assert "held 1 alert(s) before this run, 2 now" in v.reason
 
 
 # --- refusal branches ---

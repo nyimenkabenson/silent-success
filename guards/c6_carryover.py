@@ -68,11 +68,11 @@ def check_output_free_of_prior_runs(declared_path, pre_state_path, eve_path):
         return cannot("pre-state record has no boolean 'existed' field")
     existed = state["existed"]
     evidence["pre_state_existed"] = existed
-    # Carry the recorded size and digest through, so a FAIL can show the before
-    # and after rather than only asserting that a precondition was violated.
-    for field in ("size", "sha256"):
-        if field in state:
-            evidence[f"pre_state_{field}"] = state[field]
+    # Carry the recorded alert count through, so a FAIL can show the before and
+    # after rather than only asserting that a precondition was violated. Only
+    # packet-derived values are recorded: Suricata's bytes vary per invocation.
+    if "alerts" in state:
+        evidence["pre_state_alerts"] = state["alerts"]
 
     # --- the output ---
     if not eve_path.is_file():
@@ -88,7 +88,6 @@ def check_output_free_of_prior_runs(declared_path, pre_state_path, eve_path):
         if event.get("event_type") == "alert":
             alerts += 1
     evidence["alerts"] = alerts
-    evidence["output_size"] = eve_path.stat().st_size
 
     # --- the grid ---
     if existed:
@@ -96,8 +95,8 @@ def check_output_free_of_prior_runs(declared_path, pre_state_path, eve_path):
         # appending run and a truncating run are indistinguishable from the
         # count alone, so a match here would be green for the wrong reason.
         sizes = ""
-        if "size" in state:
-            sizes = f"; output was {state['size']} bytes before this run, {evidence['output_size']} now"
+        if "alerts" in state:
+            sizes = f"; output held {state['alerts']} alert(s) before this run, {alerts} now"
         detail = (f"{alerts} alert(s) against {expected} declared, consistent with carryover"
                   if alerts > expected else
                   f"count matches ({alerts}) but the slate was not clean")
