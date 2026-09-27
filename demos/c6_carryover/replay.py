@@ -42,8 +42,22 @@ def pre_state(path):
     """
     if not path.exists():
         return {"existed": False}
-    alerts = sum(1 for l in path.read_text().splitlines()
-                 if l.strip() and json.loads(l).get("event_type") == "alert")
+    alerts = 0
+    for line in path.read_text().splitlines():
+        if not line.strip():
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            # A killed or disk-full run leaves a truncated line. Record that the
+            # count is unknown rather than crashing: the guard has a refusal
+            # branch for evidence it cannot read, and the wrapper dying here
+            # would leave no pre-state record at all, so the guard would refuse
+            # for the wrong reason.
+            return {"existed": True, "alerts": None,
+                    "note": "output contains a line that is not valid JSON"}
+        if event.get("event_type") == "alert":
+            alerts += 1
     return {"existed": True, "alerts": alerts}
 
 

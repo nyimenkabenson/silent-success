@@ -202,3 +202,25 @@ def test_file_with_no_alerts_counts_zero(declared, tmp_path):
     eve.write_text("\n".join(json.dumps({"event_type": "flow"}) for _ in range(4)) + "\n")
     v = check_output_free_of_prior_runs(declared, pre, eve)
     assert v.evidence["alerts"] == 0
+
+
+def test_refuses_unreadable_pre_state_count(declared, tmp_path):
+    """The wrapper admitting it could not read the prior state. Failing here
+    would claim the slate was dirty; what the guard knows is that it cannot
+    tell, so it refuses."""
+    pre = tmp_path / "pre.json"
+    pre.write_text(json.dumps({"existed": True, "alerts": None,
+                               "note": "output contains a line that is not valid JSON"}))
+    eve = write_eve(tmp_path / "eve.json", alerts=2)
+    v = check_output_free_of_prior_runs(declared, pre, eve)
+    assert v.outcome is Outcome.CANNOT_EVALUATE
+    assert "could not be read" in v.reason
+
+
+def test_absent_pre_state_needs_no_count(declared, tmp_path):
+    """A clean slate has no alert count to record, and that must stay a pass -
+    the refusal above applies only when a prior state existed."""
+    pre = tmp_path / "pre.json"
+    pre.write_text(json.dumps({"existed": False}))
+    eve = write_eve(tmp_path / "eve.json", alerts=1)
+    assert outcome(declared, pre, eve) is Outcome.PASS
