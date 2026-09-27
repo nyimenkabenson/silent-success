@@ -71,7 +71,17 @@ def check_output_free_of_prior_runs(declared_path, pre_state_path, eve_path):
     # Carry the recorded alert count through, so a FAIL can show the before and
     # after rather than only asserting that a precondition was violated. Only
     # packet-derived values are recorded: Suricata's bytes vary per invocation.
-    if "alerts" in state:
+    if "note" in state:
+        evidence["pre_state_note"] = state["note"]
+    if existed and state.get("alerts") is None:
+        # The wrapper recorded that it could not describe the prior state.
+        # "The slate was dirty" would be a wrong-reason failure: what the guard
+        # knows is that it cannot read the prior state, not that carryover
+        # happened. The trust boundary is explicit here - the guard trusts a
+        # record it can read, and refuses one it cannot.
+        return cannot("pre-state record could not be read; "
+                      "carryover can be neither shown nor ruled out")
+    if state.get("alerts") is not None:
         evidence["pre_state_alerts"] = state["alerts"]
 
     # --- the output ---
