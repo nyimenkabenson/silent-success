@@ -51,11 +51,21 @@ def main():
     rows = {run_id: verdicts_for(run_id) for run_id in CLAIM}
 
     print(f"\n{'run':9} {'replay':>6} {'exit':>4} {'alerts':>6}  guard")
+    missing = []
     for run_id, vs in rows.items():
-        for v in vs:
+        by_seq = {v["sequence"]: v for v in vs}
+        for i, code in enumerate(exits[run_id], start=1):
+            # A replay that died before writing its verdict would otherwise
+            # vanish from this table, leaving a report that looks complete
+            # while a run is missing from it.
+            if i not in by_seq:
+                print(f"{run_id:9} {i:>6} {code:>4} {'-':>6}  NO VERDICT WRITTEN "
+                      f"(see out/c6/{run_id}/replay-{i}-error.txt)")
+                missing.append((run_id, i))
+                continue
+            v = by_seq[i]
             e = v["evidence"]
-            print(f"{run_id:9} {v['sequence']:>6} {exits[run_id][v['sequence'] - 1]:>4} "
-                  f"{e['alerts']:>6}  {v['outcome']}: {v['reason']}")
+            print(f"{run_id:9} {i:>6} {code:>4} {e['alerts']:>6}  {v['outcome']}: {v['reason']}")
 
     results = {run_id: {"exits": exits[run_id], "verdicts": vs} for run_id, vs in rows.items()}
     out = ROOT / "out" / "c6" / "results.json"
@@ -63,8 +73,9 @@ def main():
     print(f"\nwrote {out.relative_to(ROOT)}")
 
     all_clean = all(c == 0 for codes in exits.values() for c in codes)
-    held = all_clean and all([v["outcome"] for v in rows[k]] == expected
-                             for k, expected in CLAIM.items())
+    held = (not missing and all_clean
+            and all([v["outcome"] for v in rows[k]] == expected
+                    for k, expected in CLAIM.items()))
     if held:
         print("DEMONSTRATED: all four replays exited 0; the guard failed only the one")
         print("that inherited a prior run's events. Each verdict is kept beside the")

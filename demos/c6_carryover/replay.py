@@ -105,6 +105,11 @@ def main():
         json.dumps({"run_id": args.run_id, "sequence": seq, "output": str(eve), **state},
                    indent=2, sort_keys=True) + "\n")
 
+    # No --user: the pinned image expects root inside the container. Running
+    # as the host user leaves Suricata unable to read reference.config,
+    # classification.config and threshold.config - it degrades, still loads
+    # the rule, still alerts, still exits 0, and every check here stays green.
+    # Root-owned output files are the lesser problem.
     proc = subprocess.run(
         ["docker", "run", "--rm", "-v", f"{ROOT}:/work", "-w", "/work", IMAGE,
          "-c", "out/c1/suricata.yaml", "-r", "out/c1/demo.pcap",
