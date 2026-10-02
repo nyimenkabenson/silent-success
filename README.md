@@ -6,13 +6,14 @@ Security tools report "nothing found" — and you cannot tell whether that means
 there, or the tool never actually looked. A detection engine that loaded zero rules exits with
 the same status code, and the same empty alert log, as one that ran perfectly and found nothing.
 
-This project names that failure class, classifies it, and ships a guard for each class that
-checks a tool *did the work*, rather than that it exited zero.
+This project names that failure class, classifies it, and ships guards that check a tool
+*did the work* rather than that it exited zero — for four of the six classes so far.
 
 ## What this is
 
-A taxonomy of **silent success** in security tooling, with a guard for each class and a
-reproducible demonstration of each guard catching a real tool in the act.
+A taxonomy of **silent success** in security tooling. Four of the six classes ship a guard
+and a reproducible demonstration of that guard catching a tool reporting success while having
+done nothing; the other two are catalogued, with their guards specified but not built.
 
 Every guard returns one of three outcomes — `PASS`, `FAIL`, or `CANNOT_EVALUATE` — and none of
 the refusal paths can become a pass. A guard that cannot find its evidence says so; "I could not
@@ -33,16 +34,20 @@ an automated check never reads; from the pipeline's point of view, nothing was r
 
 ## Run it
 
+```bash
 ./verify.sh
+```
 
 Runs every demonstration, checks each result is byte-identical across two runs, and runs the
 test suite. Needs Python 3.12+ and Docker.
 
 Or the five-minute version:
 
+```bash
 python demos/c1_config/demo_fail.py # exit 0, zero alerts, CLEAN
 python demos/c1_config/demo_catch.py # the naive check passes both runs; the guard fails one
 cat out/c1/broken/console.txt # the errors Suricata printed while exiting 0
+```
 
 That is the whole thesis in ninety seconds.
 
