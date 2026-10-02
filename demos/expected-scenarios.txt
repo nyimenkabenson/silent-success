@@ -1,0 +1,16 @@
+# The scenarios each class's demonstration must cover, one per line as
+# "class:scenario". Checked by verify.sh against the results file.
+#
+# Committed separately from the demos so a claim cannot be quietly narrowed:
+# a demo that dropped a scenario from its own CLAIM would still compare what
+# remained, report DEMONSTRATED and exit 0. The demo checks its results
+# against its claim; this file checks the claim still covers what it should.
+1:broken
+1:correct
+1:degraded
+4:complete
+4:cleaned
+4:partial
+4:swapped
+6:careless
+6:correct
