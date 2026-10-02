@@ -97,7 +97,7 @@ step "sabotage sweep"
 # the tests that go red recorded. A branch nothing turns red is a branch that
 # could be deleted unnoticed - class 5 in the guards themselves.
 if sweep_out="$("$PY" tools/sabotage_sweep.py --check 2>&1)"; then
-  summary+=("sweep      $(printf '%s\n' "$sweep_out" | tail -2 | head -1)")
+  summary+=("sweep      $(printf '%s\n' "$sweep_out" | tail -1)")
 else
   summary+=("sweep      BRANCH WITH NO TEST THAT GOES RED")
   fail=1
@@ -117,7 +117,8 @@ step "summary"
 printf '%s\n' "${summary[@]}"
 
 if [ "$fail" -eq 0 ]; then
-  printf '\nAll demonstrations reproduced, all results identical across two runs, all tests passed.\n'
+  printf '\nAll demonstrations reproduced, all results identical across two runs,\n'
+  printf 'every guard branch load-bearing, all tests passed.\n'
 else
   printf '\nSomething did not hold. See the lines marked above.\n'
 fi
