@@ -1,5 +1,18 @@
-First classification pass, 2026-09-20, before review.
+# First classification pass, 2026-09-20
 
+**Superseded snapshot. Not the current classification.** This is the first pass, written
+before the review that produced the classes in `taxonomy.md`. It is kept unedited as
+provenance, so the classification can be audited as it developed rather than only as it
+ended up. The table below is the original file's bytes, CRLF line endings and all.
+
+Four rows were left open here and are resolved or restated in `taxonomy.md`: rows 3, 7
+and 17 are marked pending a log check, and row 20 is marked pending and points to a note
+below it that was never written.
+
+For current classes and statuses, the two exclusions, and the six instances introduced
+during the build, read [`taxonomy.md`](taxonomy.md). Cited as evidence in D-001.
+
+```text
 #	What happened	Class	Public
 1	Suricata -S without -c: zero rules loaded, exited clean	1	Yes
 2	Wazuh decoder claimed the line but extracted no fields	2	Yes
@@ -21,3 +34,4 @@ First classification pass, 2026-09-20, before review.
 18	Fixture runner crashed after writing its output	Exclude — loud failure	N/A
 19	eve.json appended across replays	6	Yes
 20	Leftover lab blocked the next lab on netforge-a3	Pending — see below	Unsure
+```
