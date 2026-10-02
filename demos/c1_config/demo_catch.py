@@ -13,46 +13,65 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # repo root, for `
 
 import common
 from guards.c1_config import check_rules_in_effect
+from guards.c1_engine_config import check_engine_config_read
 from guards.verdict import Outcome
 
 # The claim this demo makes, stated before anything runs.
+# One class, two observables. The rules guard answers "did my rules take
+# effect"; the engine guard answers "did the engine load its own config".
+# The degraded run is the case the first guard cannot see.
 CLAIM = {
-    "broken": {"naive": "green", "guard": Outcome.FAIL},
-    "correct": {"naive": "green", "guard": Outcome.PASS},
+    "broken":   {"naive": "green", "rules": Outcome.FAIL, "engine": Outcome.PASS},
+    "correct":  {"naive": "green", "rules": Outcome.PASS, "engine": Outcome.PASS},
+    "degraded": {"naive": "green", "rules": Outcome.PASS, "engine": Outcome.FAIL},
 }
 
 
 def main():
     common.prepare()
     rows = {}
-    for name, with_config in (("broken", False), ("correct", True)):
-        code, log_dir = common.run_suricata(name, with_config)
+    for name, with_config, as_user in (("broken", False, False),
+                                       ("correct", True, False),
+                                       ("degraded", True, True)):
+        code, log_dir = common.run_suricata(name, with_config, as_user)
         rows[name] = {
             "exit_code": code,
             "alerts": common.count_alerts(log_dir / "eve.json"),
             "naive": "green" if code == 0 else "red",
-            "guard": check_rules_in_effect(common.RULES, log_dir / "eve.json"),
+            "rules": check_rules_in_effect(common.RULES, log_dir / "eve.json"),
+            "engine": check_engine_config_read(log_dir / "suricata.log"),
         }
 
-    print(f"\n{'run':8} {'exit':>4} {'alerts':>6}  {'naive':6} guard")
+    print(f"\n{'run':9} {'exit':>4} {'alerts':>6}  naive  rules  engine")
     for name, r in rows.items():
-        v = r["guard"]
-        print(f"{name:8} {r['exit_code']:>4} {str(r['alerts']):>6}  {r['naive']:6} "
-              f"{v.outcome.value}: {v.reason}")
+        rv, ev = r["rules"], r["engine"]
+        print(f"{name:9} {r['exit_code']:>4} {str(r['alerts']):>6}  {r['naive']:6} "
+              f"{rv.outcome.value:6} {ev.outcome.value}")
+        if rv.outcome is Outcome.FAIL:
+            print(f"  rules:  {rv.reason}")
+        if ev.outcome is Outcome.FAIL:
+            print(f"  engine: {ev.reason}")
 
     results = {
-        name: {"exit_code": r["exit_code"], "alerts": r["alerts"],
-               "naive": r["naive"], "guard": r["guard"].to_dict()}
+        name: {"exit_code": r["exit_code"], "alerts": r["alerts"], "naive": r["naive"],
+               "rules": r["rules"].to_dict(), "engine": r["engine"].to_dict()}
         for name, r in rows.items()
     }
     out = common.OUT / "results.json"
     out.write_text(json.dumps(results, indent=2, sort_keys=True) + "\n")
     print(f"\nwrote {out}")
 
-    held = all(rows[n]["naive"] == c["naive"] and rows[n]["guard"].outcome is c["guard"]
-               for n, c in CLAIM.items())
+    held = (all(r["naive"] == "green" for r in rows.values())
+            and all(rows[n]["rules"].outcome is c["rules"] for n, c in CLAIM.items())
+            and all(rows[n]["engine"].outcome is c["engine"] for n, c in CLAIM.items()))
     if held:
-        print("DEMONSTRATED: the naive check passed both runs; the guard failed the broken one.")
+        print("DEMONSTRATED: the naive check passed all three runs.")
+        print("  broken   - rules never loaded; the rules guard caught it.")
+        print("  degraded - rules loaded and alerted, so the rules guard passed it;")
+        print("             the engine could not read three of its own config files,")
+        print("             and only the engine guard saw that.")
+        print("One class, two observables: a guard answers the question it was built for,")
+        print("and says nothing about the one it was not.")
         return 0
     print("NOT DEMONSTRATED: results differ from the claim above.")
     return 1

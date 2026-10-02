@@ -28,11 +28,19 @@ def prepare():
         subprocess.run([sys.executable, str(HERE / script)], check=True)
 
 
-def run_suricata(name, with_config):
-    """Run real Suricata on the demo traffic. Returns (exit_code, log_dir)."""
+def run_suricata(name, with_config, as_host_user=False):
+    """Run real Suricata on the demo traffic. Returns (exit_code, log_dir).
+
+    as_host_user adds --user, which leaves the container unable to read the
+    engine's own configuration files. That is a deliberate misconfiguration
+    for the third scenario, in the same way omitting -c is for the first.
+    """
     log_dir = OUT / name
     log_dir.mkdir(parents=True)
-    cmd = ["docker", "run", "--rm", "-v", f"{ROOT}:/work", "-w", "/work", IMAGE]
+    cmd = ["docker", "run", "--rm"]
+    if as_host_user:
+        cmd += ["--user", f"{os.getuid()}:{os.getgid()}"]
+    cmd += ["-v", f"{ROOT}:/work", "-w", "/work", IMAGE]
     if with_config:
         cmd += ["-c", str(CONFIG)]
     cmd += ["-r", str(PCAP), "-S", str(RULES), "-l", str(log_dir)]
