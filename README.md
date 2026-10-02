@@ -50,12 +50,16 @@ That is the whole thesis in ninety seconds.
 
 | # | Class | Guard | Status |
 |---|---|---|---|
-| 1 | Config not in effect | read back what the tool actually loaded | demonstrated |
+| 1 | Config not in effect | read back what the tool actually loaded | demonstrated, two guards |
 | 2 | Accepted, not processed | assert on extraction, not acceptance | catalogued |
 | 3 | Error turned into a verdict | pass, fail, or could-not-evaluate | catalogued |
 | 4 | Evidence doesn't match reality | check against an independent declaration | demonstrated |
-| 5 | Passed for the wrong reason | every guard needs a negative control | catalogued |
 | 6 | Carryover from a prior run | prove the starting state is empty | demonstrated |
+
+A sixth class — **passed for the wrong reason** — has five instances and no guard, because
+its countermeasure is a discipline rather than an assertion: every guard here ships with a
+negative control that proves it can go red. See the taxonomy for why that is a property of
+the class and not a gap.
 
 Incidents, reasoning and the boundary criteria: [docs/taxonomy.md](docs/taxonomy.md).
 Every design decision, with its rejected alternative: [docs/decision-log.md](docs/decision-log.md).
@@ -90,5 +94,12 @@ time and the suite must go red. It refuses to run against a file it could not re
 - **`verify.sh` has a demonstrated blind spot.** On 2026-09-29 it reported everything green while
   Suricata was failing to read three of its own configuration files: a `--user` flag added that
   morning left the container unable to open them, and Suricata degraded, still loaded the rule,
-  still alerted, still exited 0. Every demo, every guard and all 48 tests passed. The evidence is
+  still alerted, still exited 0. Every demo, every guard and all 56 tests passed. The evidence is
   in the console log. A verification script is not exempt from the failure class it verifies.
+
+  The flag was reverted the same day, and a guard now covers it: `c1.engine_config_read`
+  reads Suricata's own log and fails when the engine reports it could not open a
+  configuration file, or when a confirmation it should have printed is absent. The class 1
+  demonstration runs the degraded case live as its third scenario — the rules guard passes
+  that run, and only the engine guard catches it. The blind spot is now covered by the
+  guard whose absence let it through.
