@@ -1,0 +1,21 @@
+[1 - Suricata-Main] 2026-10-02 14:50:56 Notice: suricata: This is Suricata version 7.0.8 RELEASE running in USER mode
+[1 - Suricata-Main] 2026-10-02 14:50:56 Info: cpu: CPUs/cores online: 4
+[1 - Suricata-Main] 2026-10-02 14:50:56 Info: suricata: Setting engine mode to IDS mode by default
+[1 - Suricata-Main] 2026-10-02 14:50:56 Info: exception-policy: master exception-policy set to: auto
+[1 - Suricata-Main] 2026-10-02 14:50:56 Info: logopenfile: fast output device (regular) initialized: fast.log
+[1 - Suricata-Main] 2026-10-02 14:50:56 Info: logopenfile: eve-log output device (regular) initialized: eve.json
+[1 - Suricata-Main] 2026-10-02 14:50:56 Info: logopenfile: stats output device (regular) initialized: stats.log
+[1 - Suricata-Main] 2026-10-02 14:50:56 Warning: classification-config: could not open: "/etc/suricata/classification.config": Permission denied
+[1 - Suricata-Main] 2026-10-02 14:50:56 Error: classification-config: please check the "classification-file" option in your suricata.yaml file
+[1 - Suricata-Main] 2026-10-02 14:50:56 Error: reference-config: Error opening file: "/etc/suricata/reference.config": Permission denied
+[1 - Suricata-Main] 2026-10-02 14:50:56 Error: reference-config: please check the "reference-config-file" option in your suricata.yaml file
+[1 - Suricata-Main] 2026-10-02 14:50:56 Info: detect: 1 rule files processed. 1 rules successfully loaded, 0 rules failed, 0
+[1 - Suricata-Main] 2026-10-02 14:50:56 Warning: threshold-config: Error opening file: "/etc/suricata//threshold.config": Permission denied
+[1 - Suricata-Main] 2026-10-02 14:50:56 Info: detect: 1 signatures processed. 0 are IP-only rules, 0 are inspecting packet payload, 0 inspect application layer, 0 are decoder event only
+[16 - RX#01] 2026-10-02 14:50:56 Info: pcap: Starting file run for out/c1/demo.pcap
+[16 - RX#01] 2026-10-02 14:50:56 Info: pcap: pcap file out/c1/demo.pcap end of file reached (pcap err code 0)
+[1 - Suricata-Main] 2026-10-02 14:50:56 Notice: threads: Threads created -> RX: 1 W: 4 FM: 1 FR: 1   Engine started.
+[1 - Suricata-Main] 2026-10-02 14:50:56 Notice: suricata: Signal Received.  Stopping engine.
+[1 - Suricata-Main] 2026-10-02 14:50:56 Info: suricata: time elapsed 0.338s
+[16 - RX#01] 2026-10-02 14:50:57 Notice: pcap: read 1 file, 1 packets, 63 bytes
+[1 - Suricata-Main] 2026-10-02 14:50:57 Info: counters: Alerts: 1
