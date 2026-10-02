@@ -52,7 +52,7 @@ That is the whole thesis in ninety seconds.
 |---|---|---|---|
 | 1 | Config not in effect | read back what the tool actually loaded | demonstrated, two guards |
 | 2 | Accepted, not processed | assert on extraction, not acceptance | catalogued |
-| 3 | Error turned into a verdict | pass, fail, or could-not-evaluate | catalogued |
+| 3 | Error turned into a verdict | pass, fail, or could-not-evaluate | demonstrated |
 | 4 | Evidence doesn't match reality | check against an independent declaration | demonstrated |
 | 6 | Carryover from a prior run | prove the starting state is empty | demonstrated |
 
@@ -75,8 +75,9 @@ taxonomy exists to produce guards. Class 1 shows why: an undefined config variab
 syntax error have nothing in common as causes, but both produce `rules_loaded: 0`, and one
 unchanged guard catches both.
 
-Three classes have live demonstrations against real tools, deterministic across runs. The other
-three are catalogued instances with named guards, and the table above says which is which.
+Four of the five classes in the table have live demonstrations against real tools,
+deterministic across runs. The fifth is catalogued, and the table says which is which.
+Class 5, outside the table, has no guard by design.
 
 Every guard's refusal branches have negative controls: `tools/sabotage.py` breaks one branch at a
 time and the suite must go red. It refuses to run against a file it could not restore.

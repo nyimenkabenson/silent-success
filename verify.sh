@@ -92,6 +92,18 @@ check_demo 3 c3_verdict
 check_demo 4 c4_evidence
 check_demo 6 c6_carryover
 
+step "sabotage sweep"
+# Every refusal and failure branch in every guard, broken one at a time, with
+# the tests that go red recorded. A branch nothing turns red is a branch that
+# could be deleted unnoticed - class 5 in the guards themselves.
+if sweep_out="$("$PY" tools/sabotage_sweep.py --check 2>&1)"; then
+  summary+=("sweep      $(printf '%s\n' "$sweep_out" | tail -2 | head -1)")
+else
+  summary+=("sweep      BRANCH WITH NO TEST THAT GOES RED")
+  fail=1
+fi
+printf '%s\n' "$sweep_out" | tail -3
+
 step "tests"
 if test_out="$("$PY" -m pytest tests/ -q 2>&1)"; then
   summary+=("tests      $(printf '%s\n' "$test_out" | tail -1)")

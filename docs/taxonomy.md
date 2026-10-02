@@ -66,14 +66,14 @@ here is the broader one.
 
 ## The classes
 
-Five classes map to a guard principle; three of those principles are implemented as
+Five classes map to a guard principle; four of those principles are implemented as
 code. Class 5 maps to no guard at all, and is described separately below.
 
 | # | Class | Guard principle | Code |
 |---|---|---|---|
 | 1 | Config not in effect | Read back what the running tool actually loaded | `guards/c1_config.py`, `guards/c1_engine_config.py` |
 | 2 | Accepted, not processed | Assert on extraction, not on acceptance | none |
-| 3 | Error turned into a verdict | Three outcomes: pass, fail, or could-not-evaluate | none |
+| 3 | Error turned into a verdict | A verdict must be traceable to an executed probe | `guards/c3_verdict.py` |
 | 4 | Evidence doesn't match reality | Check against an expectation that does not come from the thing being checked | `guards/c4_evidence.py` |
 | 6 | Carryover from a prior run | Prove the starting state is empty before running | `guards/c6_carryover.py` |
 
@@ -115,14 +115,25 @@ A failure to evaluate becomes a valid-looking result.
 
 **Instances: 4** (rows 3, 7, 17, S6); rows 3 and S6 are reproducible with public
 tools, rows 7 and 17 as a pattern rather than as the original incident.
-**Guard principle:** three outcomes, never two. A check that cannot run must return
-could-not-evaluate, which can never become a pass.
-**Code: none as a standalone guard.** The principle is implemented inside every guard
-in this repository — `guards/verdict.py` and the refusal branches of all four — but
-nothing stands alone to catch it in someone else's pipeline.
-**Why catalogued:** no reproducible case has been isolated that separates the
-error-masking from the surrounding failure. Two of the four instances are classified
-on reasoning rather than on a recovered log (see the Status column).
+**Guard: implemented.** `c3.verdict_traceable_to_probe` judges a verdict against the
+probe's own execution record.
+
+A checker that reduces "the probe exited nonzero" to "traffic was denied" cannot tell a
+refusal from a probe that never ran: exit 2 and exit 127 become the same safety verdict.
+The checker's output is a claim about what it believes happened; the probe's record is a
+trace of what did, and only a trace distinguishes the two. A verdict must be traceable to
+an executed probe, never inferred from its absence. See D-017.
+
+The claim is narrower than "the verdict is correct": the trace proves the probe ran, not
+that it reached the target. A probe that ran and recorded a timeout still has no evidence
+about whether the port is blocked, which is why the `mismatched` scenario fails rather
+than passes.
+
+The `unprobed` scenario is a class 1 failure — the probe binary is not in effect —
+surfacing as a class 3 verdict, a deny with no trace. The guard catches the class 3
+symptom because that is the observable; the class 1 cause is upstream and outside this
+guard's scope. Two of the four instances are classified on reasoning rather than on a
+recovered log (see the Status column).
 
 ### Class 4 — Evidence doesn't match reality
 
@@ -272,9 +283,8 @@ because nobody verifies the verifier.
 
 - **The six classes are not a complete partition** of silent success in security
   tooling. They are the classes the realized instances supported.
-- **Three classes have no guard.** Class 2 has one instance. Class 3's principle lives
-  inside the other guards rather than standing alone. Class 5 is a discipline rather
-  than an assertion. None of these is described as planned work; what exists is what
+- **Two classes have no guard.** Class 2 has one instance. Class 5 is a discipline
+  rather than an assertion. Neither is described as planned work; what exists is what
   is listed.
 - **The instance set is one practitioner's,** gathered across one programme and one
   build. Its calibration across other codebases is untested.
