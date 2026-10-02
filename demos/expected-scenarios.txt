@@ -14,3 +14,6 @@
 4:swapped
 6:careless
 6:correct
+3:probed
+3:unprobed
+3:mismatched

@@ -66,6 +66,9 @@ check_demo() {
   fi
 
   # A hash says the output is stable, not that it still covers what it should.
+  # The match is a plain substring, so a VALUE equal to a scenario name would
+  # satisfy it as readily as a key. Good enough while scenario names are
+  # distinctive; a JSON-aware check would be needed if that stops being true.
   # A demo whose own CLAIM had been narrowed would compare what remained,
   # report DEMONSTRATED and exit 0 - so the scenarios are declared outside the
   # demos and checked here.
@@ -85,6 +88,7 @@ check_demo() {
 }
 
 check_demo 1 c1_config
+check_demo 3 c3_verdict
 check_demo 4 c4_evidence
 check_demo 6 c6_carryover
 

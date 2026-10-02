@@ -28,7 +28,9 @@ def main():
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--port", type=int, required=True)
     ap.add_argument("--record", required=True)
-    ap.add_argument("--timeout", type=float, default=2.0)
+    # 5s, not 2s: the silent target is the only timing-dependent fixture
+    # here, and Docker cold start on a loaded machine could flake it.
+    ap.add_argument("--timeout", type=float, default=5.0)
     a = ap.parse_args()
 
     Path(a.record).parent.mkdir(parents=True, exist_ok=True)
