@@ -174,7 +174,8 @@ its target text did not match. Each is a check that could only ever pass.
 The discipline is enforced rather than asserted. `tools/sabotage_sweep.py` locates every
 refusal and failure branch in every guard by AST, breaks each one in turn, and records
 which tests go red; `verify.sh` runs it with `--check` and fails if any branch has none.
-The map is `out/sabotage-map.json`: 38 branches and 5 shared `cannot` helpers across 5
+`verify.sh` generates the map at `out/sabotage-map.json`, which is gitignored, so a fresh
+clone has it after the first run: 38 branches and 5 shared `cannot` helpers across 5
 guards, every branch load-bearing. A branch with an empty `tests_red` would be this class
 inside the guards themselves - a check nothing proves can fail - so the sweep is not only
 confirming the discipline but applying it. The sweep ships with a self-test that plants a

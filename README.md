@@ -56,6 +56,9 @@ That is the whole thesis in ninety seconds.
 | 4 | Evidence doesn't match reality | check against an independent declaration | demonstrated |
 | 6 | Carryover from a prior run | prove the starting state is empty | demonstrated |
 
+*demonstrated* means a working guard, a failure that reproduces on demand, and a catch
+that is tested. *catalogued* means instances recorded and the guard named, not built.
+
 A sixth class — **passed for the wrong reason** — has five instances and no guard, because
 its countermeasure is a discipline rather than an assertion: every guard here ships with a
 negative control that proves it can go red. See the taxonomy for why that is a property of
@@ -95,7 +98,7 @@ time and the suite must go red. It refuses to run against a file it could not re
 - **`verify.sh` has a demonstrated blind spot.** On 2026-09-29 it reported everything green while
   Suricata was failing to read three of its own configuration files: a `--user` flag added that
   morning left the container unable to open them, and Suricata degraded, still loaded the rule,
-  still alerted, still exited 0. Every demo, every guard and all 56 tests passed. The evidence is
+  still alerted, still exited 0. Every demo, every guard and all 70 tests passed. The evidence is
   in the console log. A verification script is not exempt from the failure class it verifies.
 
   The flag was reverted the same day, and a guard now covers it: `c1.engine_config_read`
