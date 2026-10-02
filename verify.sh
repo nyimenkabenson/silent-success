@@ -64,6 +64,24 @@ check_demo() {
     summary+=("class $cls  determinism    DIFFERED across two runs")
     fail=1
   fi
+
+  # A hash says the output is stable, not that it still covers what it should.
+  # A demo whose own CLAIM had been narrowed would compare what remained,
+  # report DEMONSTRATED and exit 0 - so the scenarios are declared outside the
+  # demos and checked here.
+  local want missing=()
+  while IFS= read -r want; do
+    case "$want" in \#*|"") continue ;; esac
+    case "$want" in "$cls:"*) ;; *) continue ;; esac
+    local scenario="${want#*:}"
+    grep -q "\"$scenario\"" "$results" || missing+=("$scenario")
+  done < demos/expected-scenarios.txt
+  if [ "${#missing[@]}" -eq 0 ]; then
+    summary+=("class $cls  scenarios      all declared scenarios present")
+  else
+    summary+=("class $cls  scenarios      MISSING: ${missing[*]}")
+    fail=1
+  fi
 }
 
 check_demo 1 c1_config
