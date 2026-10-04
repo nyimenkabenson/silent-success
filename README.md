@@ -34,6 +34,16 @@ an automated check never reads; from the pipeline's point of view, nothing was r
 
 ## Run it
 
+First time:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Then, with the environment active:
+
 ```bash
 ./verify.sh
 ```
