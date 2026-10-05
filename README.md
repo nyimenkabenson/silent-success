@@ -130,14 +130,13 @@ time and the suite must go red. It refuses to run against a file it could not re
   that run, and only the engine guard catches it. The blind spot is now covered by the
   guard whose absence let it through.
 
-## Since submission
+## The video and the repository
 
-The project was submitted on 2026-10-05 at commit `3d7fb5c`. The two-minute video and the
-submitted summary both describe that commit: they say twenty-six instances and seventy
-tests, where the repository now says twenty-eight and seventy-nine. They are a dated
-snapshot and they agree with each other. This section is the drift.
+The two-minute video was recorded on 2026-10-04 against commit `3d7fb5c`. It says
+twenty-six instances and shows seventy tests; this repository now says twenty-eight and
+seventy-nine. The recording is a dated snapshot, and this section is the difference.
 
-Two code changes:
+Two code changes since:
 
 - `48f89b4` — the engine guard sorts its problem list, so `results.json` is stable under
   Suricata's line order, which is not stable between runs (D-019). Five order-independence
@@ -148,10 +147,10 @@ Two code changes:
 The rest is documentation: the cross-checkout determinism limitation (`6c4b081`); S7, D-019
 and D-020 (`4661af3`); worksheet rows 3, 17 and 20 settled as far as surviving evidence
 allows (`4d8d94c`); class 3's count corrected to include S7 (`834bf11`); and
-`tools/taxonomy_counts.py` with instance S8 and D-021.
+`tools/taxonomy_counts.py` with instance S8 and D-021 (`cd2e176`).
 
 No guard's verdict logic changed and no demonstration was altered. The instance table grew
 by two: S7, and S8 — the per-class counts drifting from the table, which nothing could
-detect for two hours. Omitting either to keep the count matching the submitted summary
+detect for two hours. Both are in the table; leaving either out to keep a number tidy
 would defeat the point of keeping a table of one's own failures. That arithmetic is now
 checked rather than asserted, by `tools/taxonomy_counts.py`, which the test suite runs.
