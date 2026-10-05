@@ -113,8 +113,8 @@ an instance and a checkable assertion, not a demonstration.
 
 A failure to evaluate becomes a valid-looking result.
 
-**Instances: 4** (rows 3, 7, 17, S6); rows 3 and S6 are reproducible with public
-tools, rows 7 and 17 as a pattern rather than as the original incident.
+**Instances: 5** (rows 3, 7, 17, S6, S7); rows 3, S6 and S7 are reproducible with
+public tools, rows 7 and 17 as a pattern rather than as the original incident.
 **Guard: implemented.** `c3.verdict_traceable_to_probe` judges a verdict against the
 probe's own execution record.
 
