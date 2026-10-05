@@ -62,6 +62,9 @@ def check_engine_config_read(log_path):
         if m:
             problems.append({"severity": m.group(1), "subsystem": m.group(2),
                              "detail": m.group(3)})
+    # Sorted, not file-ordered: Suricata's line order is not stable between
+    # runs, so anything recorded from this list would otherwise vary with it.
+    problems.sort(key=lambda p: (p["severity"], p["subsystem"], p["detail"]))
     evidence["problems"] = problems
 
     missing = [name for name, marker in CONFIRMATIONS.items()
