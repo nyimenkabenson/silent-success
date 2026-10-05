@@ -119,8 +119,9 @@ time and the suite must go red. It refuses to run against a file it could not re
 - **`verify.sh` has a demonstrated blind spot.** On 2026-09-29 it reported everything green while
   Suricata was failing to read three of its own configuration files: a `--user` flag added that
   morning left the container unable to open them, and Suricata degraded, still loaded the rule,
-  still alerted, still exited 0. Every demo, every guard and all 70 tests passed. The evidence is
-  in the console log. A verification script is not exempt from the failure class it verifies.
+  still alerted, still exited 0. Every demo, every guard and all 56 tests then in the suite
+  passed. The evidence is in the console log. A verification script is not exempt from the
+  failure class it verifies.
 
   The flag was reverted the same day, and a guard now covers it: `c1.engine_config_read`
   reads Suricata's own log and fails when the engine reports it could not open a
@@ -128,3 +129,22 @@ time and the suite must go red. It refuses to run against a file it could not re
   demonstration runs the degraded case live as its third scenario — the rules guard passes
   that run, and only the engine guard catches it. The blind spot is now covered by the
   guard whose absence let it through.
+
+## Since submission
+
+The project was submitted on 2026-10-05 at commit `3d7fb5c`, and the two-minute video was
+filmed against that commit — so the video shows 70 tests where the suite now has 75. What
+has changed since, recorded here rather than left to be noticed:
+
+- `6c4b081` — a limitations note on cross-checkout determinism, after a clean clone
+  reproduced the same per-class hashes as the working copy.
+- `48f89b4` — the engine guard now sorts its problem list, so `results.json` is stable
+  under Suricata's line order, which is not stable between runs (D-019). Five tests added;
+  this is what took the suite from 70 to 75, and it moved the class 1 determinism hash.
+- `21910c7` — `verify.sh` no longer reports the sweep's refusal to run as a finding about
+  the guards (D-020, instance S7).
+
+No guard's verdict logic changed and no demonstration was altered. The instance table grew
+by one, from twenty-six to twenty-seven, because S7 happened after submission: omitting it
+to keep the count matching the submitted summary would defeat the point of keeping a table
+of one's own failures.

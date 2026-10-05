@@ -1,7 +1,7 @@
 # The silent-success taxonomy
 
 Six classes of failure in security tooling, the guard principle for each, and the
-twenty-six instances the classification was built from.
+twenty-seven instances the classification was built from.
 
 ## What silent success is
 
@@ -252,6 +252,7 @@ reproducible instances; the programme rows are supporting evidence.
 | S4 | `verdict-N` named a pre-state file the next run had overwritten | 9B build | 4 | Yes | resolved |
 | S5 | `sabotage.py` did nothing when its target text did not match | 9B build | 5 | Yes | resolved |
 | S6 | `$?` after a pipeline reported grep's status, masking `verify.sh`'s exit 1 | 9B build | 3 | Yes | resolved |
+| S7 | `verify.sh` reported the sweep's refusal to run as a named finding about the guards | 9B build | 3 | Yes | resolved |
 
 ### Rows that are not settled
 
@@ -284,11 +285,11 @@ result identical across runs, and all tests passing. The evidence is the console
 That incident is why `c1.engine_config_read` exists, and why the class 1 demonstration
 now runs the degraded case live as a third scenario.
 
-**Five of the six sit in the verification layer**, across four categories: the sabotage
-tool (S5), the demo's own report (S3), the evidence trail (S2 and S4), and the shell
-command used to test a check (S6). Only S1 is in the artefact itself. That clustering
-is the finding: the code that verifies is where this failure class concentrates,
-because nobody verifies the verifier.
+**Six of the seven sit in the verification layer**, across five categories: the sabotage
+tool (S5), the demo's own report (S3), the evidence trail (S2 and S4), the shell command
+used to test a check (S6), and the verification script's own reporting (S7). Only S1 is
+in the artefact itself. That clustering is the finding: the code that verifies is where
+this failure class concentrates, because nobody verifies the verifier.
 
 ## What is not claimed
 
