@@ -132,19 +132,26 @@ time and the suite must go red. It refuses to run against a file it could not re
 
 ## Since submission
 
-The project was submitted on 2026-10-05 at commit `3d7fb5c`, and the two-minute video was
-filmed against that commit — so the video shows 70 tests where the suite now has 75. What
-has changed since, recorded here rather than left to be noticed:
+The project was submitted on 2026-10-05 at commit `3d7fb5c`. The two-minute video and the
+submitted summary both describe that commit: they say twenty-six instances and seventy
+tests, where the repository now says twenty-eight and seventy-nine. They are a dated
+snapshot and they agree with each other. This section is the drift.
 
-- `6c4b081` — a limitations note on cross-checkout determinism, after a clean clone
-  reproduced the same per-class hashes as the working copy.
-- `48f89b4` — the engine guard now sorts its problem list, so `results.json` is stable
-  under Suricata's line order, which is not stable between runs (D-019). Five tests added;
-  this is what took the suite from 70 to 75, and it moved the class 1 determinism hash.
-- `21910c7` — `verify.sh` no longer reports the sweep's refusal to run as a finding about
-  the guards (D-020, instance S7).
+Two code changes:
+
+- `48f89b4` — the engine guard sorts its problem list, so `results.json` is stable under
+  Suricata's line order, which is not stable between runs (D-019). Five order-independence
+  tests added, and the class 1 determinism hash moved.
+- `21910c7` — `verify.sh` reports the sweep's refusal to run as a refusal rather than as a
+  finding about the guards (D-020, instance S7).
+
+The rest is documentation: the cross-checkout determinism limitation (`6c4b081`); S7, D-019
+and D-020 (`4661af3`); worksheet rows 3, 17 and 20 settled as far as surviving evidence
+allows (`4d8d94c`); class 3's count corrected to include S7 (`834bf11`); and
+`tools/taxonomy_counts.py` with instance S8 and D-021.
 
 No guard's verdict logic changed and no demonstration was altered. The instance table grew
-by one, from twenty-six to twenty-seven, because S7 happened after submission: omitting it
-to keep the count matching the submitted summary would defeat the point of keeping a table
-of one's own failures.
+by two: S7, and S8 — the per-class counts drifting from the table, which nothing could
+detect for two hours. Omitting either to keep the count matching the submitted summary
+would defeat the point of keeping a table of one's own failures. That arithmetic is now
+checked rather than asserted, by `tools/taxonomy_counts.py`, which the test suite runs.

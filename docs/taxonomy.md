@@ -1,7 +1,7 @@
 # The silent-success taxonomy
 
 Six classes of failure in security tooling, the guard principle for each, and the
-twenty-seven instances the classification was built from.
+twenty-eight instances the classification was built from.
 
 ## What silent success is
 
@@ -139,8 +139,8 @@ recovered log (see the Status column).
 
 An artefact describes a different state than the one claimed.
 
-**Instances: 6** (rows 8, 10, 13, 16, S3, S4); five reproducible with public tools,
-row 13 as a pattern.
+**Instances: 7** (rows 8, 10, 13, 16, S3, S4, S8); six reproducible with public
+tools, row 13 as a pattern.
 **Guard: implemented.** `c4.manifest_covers_expected` compares a manifest against a
 declaration of expected artefacts that the build does not produce.
 
@@ -253,6 +253,7 @@ reproducible instances; the programme rows are supporting evidence.
 | S5 | `sabotage.py` did nothing when its target text did not match | 9B build | 5 | Yes | resolved |
 | S6 | `$?` after a pipeline reported grep's status, masking `verify.sh`'s exit 1 | 9B build | 3 | Yes | resolved |
 | S7 | `verify.sh` reported the sweep's refusal to run as a named finding about the guards | 9B build | 3 | Yes | resolved |
+| S8 | The taxonomy's per-class counts drifted from its own instance table | 9B build | 4 | Yes | resolved |
 
 ### Rows that are not settled
 
@@ -286,7 +287,7 @@ turns on, so the row stays provisional and the Status column says so.
 
 ### The S rows
 
-Rows S1 to S7 are failures created during the building of this project, not inherited
+Rows S1 to S8 are failures created during the building of this project, not inherited
 from the programme stages. They are included deliberately. Li, Fan and Zhuang record,
 per failure, whether it was inherited from the initial pipeline or introduced during
 repair, and their most diagnostic case — a scorer-truncation bug — was one they
@@ -300,11 +301,13 @@ result identical across runs, and all tests passing. The evidence is the console
 That incident is why `c1.engine_config_read` exists, and why the class 1 demonstration
 now runs the degraded case live as a third scenario.
 
-**Six of the seven sit in the verification layer**, across five categories: the sabotage
+**Six of the eight sit in the verification layer**, across five categories: the sabotage
 tool (S5), the demo's own report (S3), the evidence trail (S2 and S4), the shell command
-used to test a check (S6), and the verification script's own reporting (S7). Only S1 is
-in the artefact itself. That clustering is the finding: the code that verifies is where
-this failure class concentrates, because nobody verifies the verifier.
+used to test a check (S6), and the verification script's own reporting (S7). S1 is in the
+artefact itself, and S8 in the documentation — this document, whose per-class counts
+drifted from its own table. That clustering is the finding: the code that verifies is
+where this failure class concentrates, because nobody verifies the verifier — and nobody
+verified the record of it either, until `tools/taxonomy_counts.py`.
 
 ## What is not claimed
 
