@@ -108,6 +108,12 @@ time and the suite must go red. It refuses to run against a file it could not re
 - **Suricata's output has no stable byte-level property.** `flow_id` is assigned per invocation, so
   two replays of the same pcap differ in bytes and in length. Only packet-derived values are
   recorded.
+- **Determinism is verified across checkouts, not across machines.** `verify.sh` asserts that two
+  runs within one invocation produce identical results. On 2026-10-05 a clean clone at a different
+  path reproduced the same per-class hashes as the working copy, which rules out dependence on the
+  path, the checkout, or leftover output, and shows the recorded results contain no absolute paths.
+  All of it ran on one machine, one kernel and one Suricata image. A different machine may produce
+  different hashes; nothing here tests that.
 - **One replay failed to complete, once, and has not reproduced.** It wrote its pre-state and died
   before its verdict. The demo now shows a replay that produced no verdict rather than omitting it.
 - **`verify.sh` has a demonstrated blind spot.** On 2026-09-29 it reported everything green while
