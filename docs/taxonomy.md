@@ -228,7 +228,7 @@ reproducible instances; the programme rows are supporting evidence.
 |---|---|---|---|---|---|
 | 1 | Suricata `-S` without `-c`: zero rules loaded, exited clean | Stage 7 / 9B | 1 (sec. 3) | Yes | resolved |
 | 2 | Wazuh decoder claimed the line but extracted no fields | Stage 8 | 2 | Yes | resolved |
-| 3 | Wazuh certs generator failed silently, left certs at mode 0500 | Stage 8 | 3 | Yes | provisional |
+| 3 | Wazuh certs generator failed silently, left certs at mode 0500 | Stage 8 | 3 | Yes | resolved |
 | 4 | Config overlays installed where Docker Compose never reads them | Stage 8 | 1 | Yes | resolved |
 | 5 | `docker compose restart` did not reload config | Stage 8 | 1 | Yes | resolved |
 | 6 | Fixture runner judged UDP by matching rule comment text | Stage 7 | 5 | Pattern | resolved |
@@ -256,22 +256,37 @@ reproducible instances; the programme rows are supporting evidence.
 
 ### Rows that are not settled
 
+**Row 3 is resolved from source rather than from a log.** `provision-certs.sh` records
+the error verbatim — `line 636: find: command not found`, observed 2026-08-17 and
+reproduced twice — and the script runs under `set -euo pipefail` yet continues to a
+`chmod 755` workaround. Execution continuing past the generator proves the generator
+exited 0. An error on the console and a zero exit is D-004 exactly: silent at the
+interface the pipeline checks. Class 3, on evidence any reader can re-check.
+
 **Row 20 is unresolved and excluded from the class counts.** If containerlab refused
 with an error, it is a loud failure and a third exclusion. If the clean-room tests
-instead ran against the lab that was still up, it is class 6 and a strong one. Nobody
-has checked which, so it is not classified on a guess.
+instead ran against the lab that was still up, it is class 6 and a strong one. The
+Makefile shows both paths were open: `lab` runs `containerlab deploy` without
+destroying first and without `--reconfigure`, and `baseline` then addresses the
+hardcoded container `clab-netforge-a3-gateway`, which nothing checks belongs to the
+lab just deployed. No output from the run survives, so which of the two occurred
+cannot be determined, and it is not classified on a guess.
 
-**Rows 3 and 17 are classified on reasoning, not on a recovered log.** Row 3: the
-certs generator's permissions step did not run and the generator reported success
-regardless; whether `find: command not found` was printed affects how loud it was, not
-what the verdict said, and the pipeline read the exit code. Row 17: `apk` failed and
+**Row 17 will not be resolved.** The argument for class 3 is that `apk` failed and
 containerlab reported the lab deployed — a failing sub-step under a parent that
-reports success, the same shape as S6. Both arguments are sound and neither is
-evidence; the Status column says so.
+reports success, the same shape as S6. It remains an argument. The pre-fix build does
+not exist: `network-range/Dockerfile` was created already pinned and already ending in
+`&& nft --version`, in the only one of 77 commits that ever touched an `apk add`, and
+no captured output survives. What the remediation does corroborate is that the incident
+happened — the file's own header says packages are pinned and baked in "so that
+`make lab` needs no network access and produces an identical node on every host", a
+contemporaneous statement that network-dependent builds were producing non-identical
+nodes. That does not establish whether anything reported success, which is what class 3
+turns on, so the row stays provisional and the Status column says so.
 
 ### The S rows
 
-Rows S1 to S6 are failures created during the building of this project, not inherited
+Rows S1 to S7 are failures created during the building of this project, not inherited
 from the programme stages. They are included deliberately. Li, Fan and Zhuang record,
 per failure, whether it was inherited from the initial pipeline or introduced during
 repair, and their most diagnostic case — a scorer-truncation bug — was one they
