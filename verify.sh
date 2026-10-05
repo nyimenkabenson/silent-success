@@ -99,7 +99,15 @@ step "sabotage sweep"
 if sweep_out="$("$PY" tools/sabotage_sweep.py --check 2>&1)"; then
   summary+=("sweep      $(printf '%s\n' "$sweep_out" | tail -1)")
 else
-  summary+=("sweep      BRANCH WITH NO TEST THAT GOES RED")
+  sweep_last="$(printf '%s\n' "$sweep_out" | tail -1)"
+  if printf '%s\n' "$sweep_out" | grep -q '^REFUSED:'; then
+    # The sweep declined to run. Nothing was evaluated, so say that rather
+    # than naming a finding about the guards: a refusal reported as a verdict
+    # is class 3, and this script has no Verdict type to stop it.
+    summary+=("sweep      CANNOT EVALUATE - ${sweep_last}")
+  else
+    summary+=("sweep      FAILED - ${sweep_last}")
+  fi
   fail=1
 fi
 printf '%s\n' "$sweep_out" | tail -3
